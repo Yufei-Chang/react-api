@@ -1,10 +1,33 @@
 import { useEffect, useState } from "react";
-// import axios from "axios";
+import axios from "axios";
 const initialArticle = { title: "", content: "", author: "" }
+
 
 function App() {
   const [formData, setFormData] = useState(initialArticle);
   const [articles, setArticles] = useState([]);
+  
+  function loadData() {
+  axios.get("http://localhost:3001/posts").then((resp) => {
+    console.log(resp.data);
+  setArticles(resp.data)
+  })
+  }
+
+function deleteData(id) {
+  axios.delete(`http://localhost:3001/posts/${id}`).then(() => console.log("cancellazione effettuata"))
+}
+
+function addData(newArticle) {
+  axios.post("http://localhost:3001/posts", newArticle).then(() => {
+    console.log("roba aggiunta")
+    loadData();
+  })
+}
+
+useEffect(() => {
+loadData();
+}, [])
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -18,20 +41,18 @@ function App() {
     event.preventDefault();
     const { title, content, author } = formData;
     if (title && content && author) {
-    setArticles((prev_state) => [
-      ...prev_state,
-      {
-        id: Date.now(), title, content, author
-      }
-    ])
-    setFormData(initialArticle);
+      const newArticle = { title, content, author }; 
+      addData(newArticle); 
+      setFormData(initialArticle);
     }
   };
-
+  
   const handleDelete = (id) => {
     setArticles((prev) => prev.filter((curArticle) => curArticle.id !== id))
+    deleteData(id);
   };
-
+  console.log(articles)
+  
   return (
     <>
       <div className="container">
